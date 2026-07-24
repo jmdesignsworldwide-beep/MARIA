@@ -119,6 +119,7 @@ export interface Database {
           nombre: string;
           tipo: TipoCliente;
           rnc_cedula: string | null;
+          persona_contacto: string | null;
           telefono: string | null;
           email: string | null;
           direccion: string | null;
@@ -131,6 +132,7 @@ export interface Database {
           nombre: string;
           tipo?: TipoCliente;
           rnc_cedula?: string | null;
+          persona_contacto?: string | null;
           telefono?: string | null;
           email?: string | null;
           direccion?: string | null;

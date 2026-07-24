@@ -2,6 +2,7 @@
 
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { AnimatePresence, motion } from "framer-motion";
 import { toast } from "sonner";
 import {
   clienteSchema,
@@ -41,6 +42,22 @@ function Campo({
   );
 }
 
+/** Aplica la máscara de cédula: ###-#######-# (11 dígitos). */
+function mascaraCedula(valor: string): string {
+  const d = valor.replace(/\D/g, "").slice(0, 11);
+  const p = [d.slice(0, 3), d.slice(3, 10), d.slice(10, 11)].filter(Boolean);
+  return p.join("-");
+}
+
+/** Aplica la máscara de RNC: #-##-#####-# (9 dígitos). */
+function mascaraRnc(valor: string): string {
+  const d = valor.replace(/\D/g, "").slice(0, 9);
+  const p = [d.slice(0, 1), d.slice(1, 3), d.slice(3, 8), d.slice(8, 9)].filter(
+    Boolean,
+  );
+  return p.join("-");
+}
+
 export function ClienteForm({
   cliente,
   onDone,
@@ -54,6 +71,7 @@ export function ClienteForm({
     register,
     handleSubmit,
     control,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<ClienteFormInput, unknown, ClienteInput>({
     resolver: zodResolver(clienteSchema),
@@ -61,6 +79,7 @@ export function ClienteForm({
       nombre: cliente?.nombre ?? "",
       tipo: cliente?.tipo ?? "empresa",
       rnc_cedula: cliente?.rnc_cedula ?? "",
+      persona_contacto: cliente?.persona_contacto ?? "",
       telefono: cliente?.telefono ?? "",
       email: cliente?.email ?? "",
       direccion: cliente?.direccion ?? "",
@@ -69,6 +88,9 @@ export function ClienteForm({
       activo: cliente?.activo ?? true,
     },
   });
+
+  const tipo = watch("tipo");
+  const esEmpresa = tipo === "empresa";
 
   async function onSubmit(values: ClienteInput) {
     const res = cliente
@@ -87,21 +109,80 @@ export function ClienteForm({
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
-      <Campo label="Nombre o razón social" htmlFor="nombre" error={errors.nombre?.message}>
-        <Input id="nombre" placeholder="Ferretería Almonte, SRL" {...register("nombre")} />
-      </Campo>
-
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <Campo label="Tipo" htmlFor="tipo" error={errors.tipo?.message}>
+        <Campo label="Tipo de cliente" htmlFor="tipo" error={errors.tipo?.message}>
           <Select id="tipo" {...register("tipo")}>
             <option value="empresa">Empresa</option>
             <option value="persona">Persona</option>
           </Select>
         </Campo>
-        <Campo label="RNC o cédula" htmlFor="rnc_cedula" error={errors.rnc_cedula?.message}>
-          <Input id="rnc_cedula" placeholder="1-30-11223-4" {...register("rnc_cedula")} />
+        <Campo
+          label={esEmpresa ? "Razón social" : "Nombre completo"}
+          htmlFor="nombre"
+          error={errors.nombre?.message}
+        >
+          <Input
+            id="nombre"
+            placeholder={esEmpresa ? "Ferretería Almonte, SRL" : "Juan Pérez"}
+            {...register("nombre")}
+          />
         </Campo>
       </div>
+
+      <Controller
+        control={control}
+        name="rnc_cedula"
+        render={({ field }) => (
+          <Campo
+            label={esEmpresa ? "RNC" : "Cédula"}
+            htmlFor="rnc_cedula"
+            error={errors.rnc_cedula?.message}
+          >
+            <Input
+              id="rnc_cedula"
+              inputMode="numeric"
+              className="tabular-nums"
+              placeholder={esEmpresa ? "1-30-11223-4" : "001-1234567-8"}
+              value={field.value ?? ""}
+              onChange={(e) =>
+                field.onChange(
+                  esEmpresa
+                    ? mascaraRnc(e.target.value)
+                    : mascaraCedula(e.target.value),
+                )
+              }
+              onBlur={field.onBlur}
+            />
+          </Campo>
+        )}
+      />
+
+      {/* Persona de contacto: solo empresas, con transición de altura/opacidad. */}
+      <AnimatePresence initial={false}>
+        {esEmpresa && (
+          <motion.div
+            key="persona-contacto"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.25, ease: "easeInOut" }}
+            className="overflow-hidden"
+          >
+            <Campo
+              label="Persona de contacto"
+              htmlFor="persona_contacto"
+              error={errors.persona_contacto?.message}
+              className="pt-px"
+            >
+              <Input
+                id="persona_contacto"
+                placeholder="Ana Rodríguez — Compras"
+                {...register("persona_contacto")}
+              />
+            </Campo>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Campo label="Teléfono" htmlFor="telefono" error={errors.telefono?.message}>
