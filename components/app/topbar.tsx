@@ -14,7 +14,7 @@ import { UserMenu } from "@/components/app/user-menu";
  * Barra superior. En móvil incluye el botón hamburguesa que abre el
  * cajón de navegación; en escritorio solo acompaña con acciones.
  */
-export function Topbar({ email }: { email: string }) {
+export function Topbar({ email, nombreEmpresa }: { email: string; nombreEmpresa: string }) {
   const [drawerAbierto, setDrawerAbierto] = useState(false);
   const pathname = usePathname();
 
@@ -62,7 +62,7 @@ export function Topbar({ email }: { email: string }) {
 
       <div className="flex items-center gap-2 lg:ml-2">
         <ThemeToggle />
-        <UserMenu email={email} />
+        <UserMenu email={email} nombre={nombreEmpresa} />
       </div>
 
       {/* Cajón de navegación móvil */}

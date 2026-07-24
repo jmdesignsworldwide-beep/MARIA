@@ -18,7 +18,12 @@ export const metadata: Metadata = { title: "Factura" };
 type FacturaDetalle = Factura & {
   factura_lineas: FacturaLinea[];
   pagos: Pago[];
-  cliente: { nombre: string; telefono: string | null; rnc_cedula: string | null } | null;
+  cliente: {
+    nombre: string;
+    tipo: "persona" | "empresa";
+    telefono: string | null;
+    rnc_cedula: string | null;
+  } | null;
 };
 
 function construirWhatsApp(telefono: string | null, mensaje: string): string {
@@ -39,7 +44,7 @@ export default async function FacturaDetallePage({
 
   const { data: facData } = await supabase
     .from("facturas")
-    .select("*, factura_lineas(*), pagos(*), cliente:clientes(nombre, telefono, rnc_cedula)")
+    .select("*, factura_lineas(*), pagos(*), cliente:clientes(nombre, tipo, telefono, rnc_cedula)")
     .eq("id", id)
     .maybeSingle();
 
@@ -142,6 +147,7 @@ export default async function FacturaDetallePage({
           cliente
             ? {
                 nombre: cliente.nombre,
+                tipo: cliente.tipo,
                 rnc_cedula: cliente.rnc_cedula,
                 telefono: cliente.telefono,
                 email: null,
@@ -219,9 +225,9 @@ export default async function FacturaDetallePage({
           <Resumen label="Subtotal" valor={Number(fac.subtotal)} />
           {Number(fac.descuento) > 0 && <Resumen label="Descuento" valor={-Number(fac.descuento)} />}
           <Resumen label="ITBIS" valor={Number(fac.itbis)} />
-          <div className="flex w-full max-w-xs justify-between border-t border-line pt-2 text-base font-semibold">
-            <span>Total</span>
-            <span className="tabular-nums text-accent">{formatearRD(total)}</span>
+          <div className="flex w-full max-w-xs items-baseline justify-between border-t border-line pt-2">
+            <span className="text-lg font-semibold text-fg">Total</span>
+            <span className="text-lg font-semibold tabular-nums text-accent">{formatearRD(total)}</span>
           </div>
           {cobrado > 0 && <Resumen label="Cobrado" valor={cobrado} />}
           {saldo > 0 && fac.estado !== "anulada" && (

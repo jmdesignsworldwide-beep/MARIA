@@ -358,9 +358,9 @@ export function CotizacionForm({
               <dt className="text-muted">ITBIS</dt>
               <dd className="tabular-nums">{formatearRD(totales.itbis)}</dd>
             </div>
-            <div className="mt-2 flex justify-between border-t border-line pt-3 text-base font-semibold">
-              <dt>Total</dt>
-              <dd className="tabular-nums text-accent">{formatearRD(totales.total)}</dd>
+            <div className="mt-2 flex items-baseline justify-between border-t border-line pt-3">
+              <dt className="text-lg font-semibold text-fg">Total</dt>
+              <dd className="text-lg font-semibold tabular-nums text-accent">{formatearRD(totales.total)}</dd>
             </div>
           </dl>
           <Button type="submit" size="lg" loading={isSubmitting} className="mt-6 w-full">

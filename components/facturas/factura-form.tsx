@@ -371,9 +371,9 @@ export function FacturaForm({
             <Fila label="Subtotal" valor={t.subtotal} />
             {descuento > 0 && <Fila label="Descuento" valor={-descuento} />}
             <Fila label="ITBIS" valor={t.itbis} />
-            <div className="mt-2 flex justify-between border-t border-line pt-3 text-base font-semibold">
-              <dt>Total</dt>
-              <dd className="tabular-nums text-accent">{formatearRD(t.total)}</dd>
+            <div className="mt-2 flex items-baseline justify-between border-t border-line pt-3">
+              <dt className="text-lg font-semibold text-fg">Total</dt>
+              <dd className="text-lg font-semibold tabular-nums text-accent">{formatearRD(t.total)}</dd>
             </div>
             <div className="flex justify-between text-xs text-muted">
               <dt>Costo</dt>

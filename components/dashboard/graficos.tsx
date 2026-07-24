@@ -6,6 +6,8 @@ import {
   Area,
   BarChart,
   Bar,
+  LineChart,
+  Line,
   PieChart,
   Pie,
   Cell,
@@ -85,6 +87,75 @@ export function BarrasClientes({ data }: { data: { nombre: string; total: number
         <Tooltip content={<TooltipMoneda />} cursor={{ fill: "var(--bg-elevated)" }} />
         <Bar dataKey="total" name="Facturado" fill="var(--accent)" radius={[0, 6, 6, 0]} />
       </BarChart>
+    </ResponsiveContainer>
+  );
+}
+
+export function BarrasTendenciaGastos({
+  data,
+}: {
+  data: { mes: string; total: number }[] }) {
+  return (
+    <ResponsiveContainer width="100%" height={200}>
+      <BarChart data={data} margin={{ top: 8, right: 8, left: -8, bottom: 0 }}>
+        <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+        <XAxis dataKey="mes" tick={ejeStyle} axisLine={false} tickLine={false} />
+        <YAxis tick={ejeStyle} axisLine={false} tickLine={false} width={44}
+          tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
+        <Tooltip content={<TooltipMoneda />} cursor={{ fill: "var(--bg-elevated)" }} />
+        <Bar dataKey="total" name="Gastos" fill="var(--accent)" radius={[6, 6, 0, 0]} />
+      </BarChart>
+    </ResponsiveContainer>
+  );
+}
+
+function TooltipPct({
+  active,
+  payload,
+  label,
+}: {
+  active?: boolean;
+  payload?: { value: number }[];
+  label?: string;
+}) {
+  if (!active || !payload?.length) return null;
+  return (
+    <div className="rounded-field border border-line bg-elevated px-3 py-2 text-xs shadow-elevated">
+      {label && <p className="mb-0.5 font-medium text-fg">{label}</p>}
+      <p className="tabular-nums text-muted">
+        Margen: <span className="text-fg">{payload[0]!.value.toFixed(1)}%</span>
+      </p>
+    </div>
+  );
+}
+
+export function LineaMargen({
+  data,
+}: {
+  data: { mes: string; margen: number }[] }) {
+  return (
+    <ResponsiveContainer width="100%" height={220}>
+      <LineChart data={data} margin={{ top: 8, right: 12, left: -8, bottom: 0 }}>
+        <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+        <XAxis dataKey="mes" tick={ejeStyle} axisLine={false} tickLine={false} />
+        <YAxis
+          tick={ejeStyle}
+          axisLine={false}
+          tickLine={false}
+          width={44}
+          tickFormatter={(v) => `${v}%`}
+        />
+        <Tooltip content={<TooltipPct />} />
+        <Line
+          type="monotone"
+          dataKey="margen"
+          name="Margen"
+          stroke="var(--accent)"
+          strokeWidth={2.5}
+          dot={{ r: 3, fill: "var(--accent)" }}
+          activeDot={{ r: 5 }}
+        />
+      </LineChart>
     </ResponsiveContainer>
   );
 }

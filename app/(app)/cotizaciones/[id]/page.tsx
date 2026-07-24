@@ -16,7 +16,12 @@ export const metadata: Metadata = { title: "Cotización" };
 
 type CotizacionDetalle = Cotizacion & {
   cotizacion_lineas: CotizacionLinea[];
-  cliente: { nombre: string; telefono: string | null; rnc_cedula: string | null } | null;
+  cliente: {
+    nombre: string;
+    tipo: "persona" | "empresa";
+    telefono: string | null;
+    rnc_cedula: string | null;
+  } | null;
 };
 
 function construirWhatsApp(
@@ -40,7 +45,7 @@ export default async function CotizacionDetallePage({
 
   const { data: cotData } = await supabase
     .from("cotizaciones")
-    .select("*, cotizacion_lineas(*), cliente:clientes(nombre, telefono, rnc_cedula)")
+    .select("*, cotizacion_lineas(*), cliente:clientes(nombre, tipo, telefono, rnc_cedula)")
     .eq("id", id)
     .maybeSingle();
 
@@ -128,6 +133,7 @@ export default async function CotizacionDetallePage({
           cliente
             ? {
                 nombre: cliente.nombre,
+                tipo: cliente.tipo,
                 rnc_cedula: cliente.rnc_cedula,
                 telefono: cliente.telefono,
                 email: null,
@@ -194,9 +200,9 @@ export default async function CotizacionDetallePage({
             <span className="text-muted">ITBIS</span>
             <span className="tabular-nums">{formatearRD(Number(cot.itbis))}</span>
           </div>
-          <div className="flex w-full max-w-xs justify-between border-t border-line pt-2 text-base font-semibold">
-            <span>Total</span>
-            <span className="tabular-nums text-accent">{formatearRD(Number(cot.total))}</span>
+          <div className="flex w-full max-w-xs items-baseline justify-between border-t border-line pt-2">
+            <span className="text-lg font-semibold text-fg">Total</span>
+            <span className="text-lg font-semibold tabular-nums text-accent">{formatearRD(Number(cot.total))}</span>
           </div>
         </div>
       </div>

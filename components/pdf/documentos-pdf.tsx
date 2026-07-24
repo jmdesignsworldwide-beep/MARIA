@@ -8,6 +8,7 @@ import {
   StyleSheet,
 } from "@react-pdf/renderer";
 import { formatearRD, formatearFecha } from "@/lib/format";
+import { MARCA_PIE } from "@/lib/brand";
 import type {
   EmpresaPDF,
   ClientePDF,
@@ -89,6 +90,7 @@ const s = StyleSheet.create({
     borderBottomWidth: 1,
     borderColor: c.lineSoft,
   },
+  tRowAlt: { backgroundColor: "#FAFAFA" },
   cDesc: { flex: 1, paddingRight: 8 },
   cNum: { width: 55, textAlign: "right" },
   cPrecio: { width: 80, textAlign: "right" },
@@ -117,6 +119,11 @@ const s = StyleSheet.create({
     padding: 8,
   },
   bancoLinea: { fontSize: 8.5, color: c.ink, marginBottom: 1 },
+  firmaWrap: { flexDirection: "row", justifyContent: "flex-end", marginTop: 44 },
+  firmaBox: { width: 220, alignItems: "center" },
+  firmaLinea: { width: 220, borderTopWidth: 1, borderColor: c.ink, marginBottom: 4 },
+  firmaNombre: { fontSize: 9, fontFamily: "Helvetica-Bold", color: c.ink },
+  firmaRol: { fontSize: 8, color: c.muted, marginTop: 1 },
   footer: {
     position: "absolute",
     bottom: 28,
@@ -186,7 +193,10 @@ export function DocumentoComercialDoc({
           <Text style={s.seccionTitulo}>{esFactura ? "Facturar a" : "Cliente"}</Text>
           <Text style={s.clienteNombre}>{cliente?.nombre ?? "—"}</Text>
           {cliente?.rnc_cedula && (
-            <Text style={s.clienteLinea}>RNC/Cédula: {cliente.rnc_cedula}</Text>
+            <Text style={s.clienteLinea}>
+              {cliente.tipo === "persona" ? "Cédula: " : "RNC: "}
+              {cliente.rnc_cedula}
+            </Text>
           )}
           {(cliente?.telefono || cliente?.email) && (
             <Text style={s.clienteLinea}>
@@ -203,7 +213,7 @@ export function DocumentoComercialDoc({
           <Text style={[s.tHeadCell, s.cImporte]}>Importe</Text>
         </View>
         {doc.lineas.map((l, i) => (
-          <View key={i} style={s.tRow} wrap={false}>
+          <View key={i} style={i % 2 === 1 ? [s.tRow, s.tRowAlt] : s.tRow} wrap={false}>
             <Text style={s.cDesc}>{l.descripcion}</Text>
             <Text style={s.cNum}>{l.cantidad}</Text>
             <Text style={s.cPrecio}>{formatearRD(l.precio_unitario)}</Text>
@@ -268,8 +278,17 @@ export function DocumentoComercialDoc({
           </View>
         )}
 
+        {/* Firma */}
+        <View style={s.firmaWrap} wrap={false}>
+          <View style={s.firmaBox}>
+            <View style={s.firmaLinea} />
+            <Text style={s.firmaNombre}>{empresa.nombre}</Text>
+            <Text style={s.firmaRol}>Firma autorizada</Text>
+          </View>
+        </View>
+
         <Text style={s.footer} fixed>
-          {empresa.nombre} · Documento generado con JM Facturación
+          {MARCA_PIE}
         </Text>
       </Page>
     </Document>
@@ -343,7 +362,7 @@ export function EstadoCuentaDoc({
         </View>
 
         <Text style={s.footer} fixed>
-          {empresa.nombre} · Estado de cuenta generado con JM Facturación
+          {MARCA_PIE}
         </Text>
       </Page>
     </Document>

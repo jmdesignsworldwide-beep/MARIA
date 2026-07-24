@@ -1,52 +1,35 @@
 import { cn } from "@/lib/utils";
 
 /**
- * Marca de JM Facturación. Monograma "JM" en ámbar dentro de un
- * cuadro grafito, con el nombre en tipografía editorial.
+ * Marca del negocio: logo de MCS Importaciones (PNG transparente, se ve
+ * bien en modo claro y oscuro). Reemplaza el monograma anterior.
  */
 export function Brand({
   className,
-  showName = true,
   size = "md",
 }: {
   className?: string;
+  // Se conserva en el tipo por compatibilidad con las llamadas existentes;
+  // el logo ya incluye el nombre, así que no se renderiza texto aparte.
   showName?: boolean;
   size?: "sm" | "md" | "lg";
 }) {
-  const box = size === "lg" ? "h-11 w-11" : size === "sm" ? "h-8 w-8" : "h-9 w-9";
-  const mono = size === "lg" ? "text-lg" : "text-sm";
-  const name = size === "lg" ? "text-xl" : "text-base";
+  // Relación de aspecto del logo ≈ 2.51:1 (640×255).
+  const alto = size === "lg" ? 56 : size === "sm" ? 26 : 34;
+  const ancho = Math.round(alto * 2.51);
 
   return (
-    <div className={cn("flex items-center gap-2.5", className)}>
-      <div
-        className={cn(
-          "flex flex-none items-center justify-center rounded-field bg-gradient-to-br from-elevated to-surface shadow-soft",
-          "ring-1 ring-line",
-          box,
-        )}
-      >
-        <span
-          className={cn(
-            "font-display font-semibold tracking-tight text-accent",
-            mono,
-          )}
-        >
-          JM
-        </span>
-      </div>
-      {showName && (
-        <div className="flex flex-col leading-none">
-          <span
-            className={cn("font-display font-semibold tracking-tight", name)}
-          >
-            JM Facturación
-          </span>
-          <span className="mt-0.5 text-[10px] font-medium uppercase tracking-[0.2em] text-muted">
-            Control financiero
-          </span>
-        </div>
-      )}
-    </div>
+    <span className={cn("inline-flex items-center", className)}>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/logo-importaciones.png"
+        alt="MCS Importaciones"
+        width={ancho}
+        height={alto}
+        style={{ height: alto, width: "auto" }}
+        className="select-none"
+        draggable={false}
+      />
+    </span>
   );
 }

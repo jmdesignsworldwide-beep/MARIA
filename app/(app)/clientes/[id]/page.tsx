@@ -68,10 +68,12 @@ export default async function ClienteFichaPage({
     { label: "Utilidad generada", valor: utilidad, tono: "text-accent" },
   ];
 
+  const etiquetaDoc = cliente.tipo === "persona" ? "Cédula" : "RNC";
   const datos = [
+    { icon: CreditCard, label: etiquetaDoc, valor: cliente.rnc_cedula },
+    { icon: User, label: "Persona de contacto", valor: cliente.persona_contacto },
     { icon: Phone, label: "Teléfono", valor: cliente.telefono },
     { icon: Mail, label: "Correo", valor: cliente.email },
-    { icon: CreditCard, label: "RNC / Cédula", valor: cliente.rnc_cedula },
     { icon: MapPin, label: "Dirección", valor: cliente.direccion },
   ].filter((d) => d.valor);
 
@@ -139,6 +141,7 @@ export default async function ClienteFichaPage({
               empresa={mapEmpresaPDF(empresaRow ?? null)}
               cliente={{
                 nombre: cliente.nombre,
+                tipo: cliente.tipo,
                 rnc_cedula: cliente.rnc_cedula,
                 telefono: cliente.telefono,
                 email: cliente.email,

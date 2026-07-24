@@ -18,6 +18,7 @@ export type EmpresaPDF = {
 
 export type ClientePDF = {
   nombre: string;
+  tipo?: "persona" | "empresa";
   rnc_cedula: string | null;
   telefono: string | null;
   email: string | null;
