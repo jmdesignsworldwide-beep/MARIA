@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Search } from "lucide-react";
 import { Brand } from "@/components/brand";
 import { NavContent } from "@/components/app/nav-content";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
@@ -46,7 +46,21 @@ export function Topbar({ email }: { email: string }) {
         <Brand showName={false} />
       </div>
 
-      <div className="ml-auto flex items-center gap-2">
+      {/* Buscador global (Cmd+K) */}
+      <button
+        type="button"
+        onClick={() => window.dispatchEvent(new Event("abrir-busqueda"))}
+        className="ml-auto flex items-center gap-2 rounded-field border border-line bg-elevated px-3 py-2 text-sm text-muted transition-colors hover:border-accent/50 hover:text-fg lg:ml-6 lg:w-64 lg:justify-start"
+        aria-label="Buscar"
+      >
+        <Search className="h-4 w-4 flex-none" />
+        <span className="hidden lg:inline">Buscar…</span>
+        <kbd className="ml-auto hidden rounded border border-line bg-surface px-1.5 py-0.5 text-[10px] font-medium text-muted lg:inline">
+          ⌘K
+        </kbd>
+      </button>
+
+      <div className="flex items-center gap-2 lg:ml-2">
         <ThemeToggle />
         <UserMenu email={email} />
       </div>
