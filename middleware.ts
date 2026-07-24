@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
 /** Rutas públicas (accesibles sin sesión). */
-const RUTAS_PUBLICAS = ["/login"];
+const RUTAS_PUBLICAS = ["/login", "/acceso-expirado"];
 
 /**
  * Middleware de sesión + protección de rutas.

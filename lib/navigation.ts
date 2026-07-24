@@ -11,6 +11,7 @@ import {
   TrendingUp,
   ScrollText,
   Settings,
+  KeyRound,
   type LucideIcon,
 } from "lucide-react";
 
@@ -21,6 +22,8 @@ export type NavItem = {
   /** Tanda en la que se construye el módulo (para el estado "próximamente"). */
   tanda: number;
   descripcion: string;
+  /** Solo visible/accesible para el rol admin (además del control en servidor). */
+  soloAdmin?: boolean;
 };
 
 export type NavGroup = {
@@ -135,11 +138,29 @@ export const navGroups: NavGroup[] = [
         href: "/ajustes",
         icon: Settings,
         tanda: 13,
-        descripcion: "Datos de empresa, numeración, ITBIS y accesos demo.",
+        descripcion: "Datos de empresa, numeración e ITBIS.",
+      },
+      {
+        label: "Accesos",
+        href: "/accesos",
+        icon: KeyRound,
+        tanda: 16,
+        descripcion: "Portal de cuentas con acceso temporal (solo admin).",
+        soloAdmin: true,
       },
     ],
   },
 ];
+
+/** Filtra los ítems de navegación según el rol (oculta los de admin). */
+export function navGroupsParaRol(esAdmin: boolean): NavGroup[] {
+  return navGroups
+    .map((g) => ({
+      ...g,
+      items: g.items.filter((i) => !i.soloAdmin || esAdmin),
+    }))
+    .filter((g) => g.items.length > 0);
+}
 
 /** Lista plana de todos los ítems de navegación. */
 export const navItems: NavItem[] = navGroups.flatMap((g) => g.items);
