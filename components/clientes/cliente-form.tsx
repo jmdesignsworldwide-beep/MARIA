@@ -47,7 +47,7 @@ export function ClienteForm({
   onCancel,
 }: {
   cliente?: Cliente;
-  onDone: () => void;
+  onDone: (created?: { id: string; nombre: string }) => void;
   onCancel: () => void;
 }) {
   const {
@@ -80,7 +80,9 @@ export function ClienteForm({
       return;
     }
     toast.success(cliente ? "Cliente actualizado." : "Cliente creado.");
-    onDone();
+    onDone(
+      cliente || !res.id ? undefined : { id: res.id, nombre: values.nombre },
+    );
   }
 
   return (
