@@ -1,10 +1,15 @@
 import type { Metadata } from "next";
-import { ComingSoon } from "@/components/app/coming-soon";
+import { createClient } from "@/lib/supabase/server";
+import { CatalogoVista } from "@/components/catalogo/catalogo-vista";
 
-export const metadata: Metadata = {
-  title: "Catálogo",
-};
+export const metadata: Metadata = { title: "Catálogo" };
 
-export default function Page() {
-  return <ComingSoon href="/catalogo" />;
+export default async function CatalogoPage() {
+  const supabase = await createClient();
+  const { data: items } = await supabase
+    .from("catalogo_items")
+    .select("*")
+    .order("descripcion", { ascending: true });
+
+  return <CatalogoVista items={items ?? []} />;
 }
