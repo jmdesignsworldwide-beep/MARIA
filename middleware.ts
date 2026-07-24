@@ -1,14 +1,17 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
+/** Rutas públicas (accesibles sin sesión). */
+const RUTAS_PUBLICAS = ["/login"];
+
 /**
- * Middleware de refresco de sesión de Supabase.
- * Mantiene los tokens de auth frescos en cada navegación y propaga
- * las cookies actualizadas tanto al servidor como al navegador.
+ * Middleware de sesión + protección de rutas.
+ * 1. Refresca los tokens de Supabase en cada navegación.
+ * 2. Redirige a /login a quien no tenga sesión (protección server-side).
+ * 3. Saca del /login a quien ya esté autenticado.
  *
- * En Tanda 1 solo refresca la sesión (cableado). La protección de
- * rutas (redirección de no autenticados) se añade con el módulo de
- * Auth en la Tanda 2.
+ * La verificación real de permisos vive en el servidor; esto es la
+ * primera barrera de navegación.
  */
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({ request });
@@ -16,7 +19,7 @@ export async function middleware(request: NextRequest) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-  // Sin configuración de Supabase, no hay sesión que refrescar.
+  // Sin configuración de Supabase no se puede evaluar la sesión.
   if (!supabaseUrl || !supabaseAnonKey) {
     return response;
   }
@@ -38,9 +41,31 @@ export async function middleware(request: NextRequest) {
     },
   });
 
-  // IMPORTANTE: refresca la sesión. No colocar código entre la
-  // creación del cliente y esta llamada.
-  await supabase.auth.getUser();
+  // IMPORTANTE: no colocar código entre createServerClient y getUser.
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const { pathname } = request.nextUrl;
+  const esRutaPublica = RUTAS_PUBLICAS.some(
+    (ruta) => pathname === ruta || pathname.startsWith(`${ruta}/`),
+  );
+
+  // No autenticado en ruta privada → a /login.
+  if (!user && !esRutaPublica) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/login";
+    url.searchParams.set("redirect", pathname);
+    return NextResponse.redirect(url);
+  }
+
+  // Autenticado intentando ver /login → al panel.
+  if (user && esRutaPublica) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/dashboard";
+    url.search = "";
+    return NextResponse.redirect(url);
+  }
 
   return response;
 }
@@ -48,10 +73,8 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     /*
-     * Aplica a todas las rutas excepto archivos estáticos e imágenes:
-     * - _next/static, _next/image
-     * - favicon.ico y assets con extensión de imagen
+     * Todas las rutas excepto estáticos, imágenes y la API de auth.
      */
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
   ],
 };
