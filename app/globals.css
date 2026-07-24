@@ -1,0 +1,140 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================
+   SISTEMA DE DISEÑO — "GRAFITO & ÁMBAR"
+   Paleta sobria y financiera. Modo oscuro (principal) y claro,
+   ambos completos. Tokens como variables CSS para que Tailwind
+   y los componentes los consuman por nombre semántico.
+   ============================================================ */
+
+@layer base {
+  /* --- Modo oscuro (principal) --- */
+  :root,
+  .dark {
+    --bg-base: #0a0c0f;
+    --bg-surface: #13161b;
+    --bg-elevated: #1b1f26;
+    --border: #262b33;
+    --border-soft: #1e222a;
+    --text-primary: #f2f4f7;
+    --text-muted: #98a2b3;
+    --accent: #e8a33d;
+    --accent-hover: #f0b45c;
+    --accent-soft: #3a2e1a;
+    --accent-contrast: #1a1204;
+    --success: #34d399;
+    --success-soft: #0f2a20;
+    --warning: #fbbf24;
+    --warning-soft: #2a2109;
+    --danger: #f87171;
+    --danger-soft: #2c1414;
+    --info: #60a5fa;
+    --info-soft: #10203a;
+    --ring: #e8a33d;
+    --overlay: rgba(3, 5, 8, 0.7);
+    --shadow-color: 220 40% 2%;
+  }
+
+  /* --- Modo claro --- */
+  .light {
+    --bg-base: #fafaf8;
+    --bg-surface: #ffffff;
+    --bg-elevated: #ffffff;
+    --border: #e4e7ec;
+    --border-soft: #eef0f3;
+    --text-primary: #101828;
+    --text-muted: #667085;
+    --accent: #b87817;
+    --accent-hover: #a56a15;
+    --accent-soft: #f6ecda;
+    --accent-contrast: #ffffff;
+    --success: #059669;
+    --success-soft: #e7f6ef;
+    --warning: #b45309;
+    --warning-soft: #fdf1e3;
+    --danger: #dc2626;
+    --danger-soft: #fdeaea;
+    --info: #2563eb;
+    --info-soft: #e8eefc;
+    --ring: #b87817;
+    --overlay: rgba(16, 24, 40, 0.45);
+    --shadow-color: 220 25% 65%;
+  }
+
+  * {
+    border-color: var(--border);
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--bg-base);
+    color: var(--text-primary);
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Foco visible y accesible (AA) en todo elemento interactivo. */
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* Autocompletar sin fondo blanco chillón en modo oscuro. */
+  input:-webkit-autofill,
+  input:-webkit-autofill:focus {
+    -webkit-text-fill-color: var(--text-primary);
+    -webkit-box-shadow: 0 0 0 1000px var(--bg-elevated) inset;
+    transition: background-color 5000s ease-in-out 0s;
+  }
+
+  ::selection {
+    background: var(--accent);
+    color: var(--accent-contrast);
+  }
+}
+
+@layer utilities {
+  /* Números con ancho tabular para alinear montos RD$ en columnas. */
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Barra de scroll discreta y acorde al tema. */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: var(--border);
+    border-radius: 9999px;
+  }
+}
+
+/* Respeta a quien prefiere menos movimiento. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
