@@ -9,6 +9,7 @@ import { motion } from "framer-motion";
 import { Eye, EyeOff, Mail, Lock, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
+import { registrarSesion } from "@/lib/actions/bitacora";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -58,10 +59,12 @@ export function LoginForm({ redirectTo }: { redirectTo: string }) {
     });
 
     if (error) {
+      void registrarSesion("sesion_fallida", values.email.trim());
       toast.error(traducirError(error.message));
       return;
     }
 
+    void registrarSesion("sesion_inicio");
     toast.success("Sesión iniciada. Bienvenida.");
     router.push(redirectTo);
     router.refresh();
