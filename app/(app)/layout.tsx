@@ -2,6 +2,8 @@ import type { ReactNode } from "react";
 import { requireUser } from "@/lib/auth";
 import { Sidebar } from "@/components/app/sidebar";
 import { Topbar } from "@/components/app/topbar";
+import { CommandPalette } from "@/components/app/command-palette";
+import { Bienvenida } from "@/components/app/bienvenida";
 
 /**
  * Layout del área autenticada. Exige sesión en el SERVIDOR antes de
@@ -14,9 +16,12 @@ export default async function AppLayout({
   children: ReactNode;
 }) {
   const user = await requireUser();
+  const nombre = user.email?.split("@")[0] ?? "";
 
   return (
     <div className="min-h-screen">
+      <Bienvenida nombre={nombre} />
+      <CommandPalette />
       <Sidebar />
       <div className="lg:pl-64">
         <Topbar email={user.email ?? "usuario"} />
