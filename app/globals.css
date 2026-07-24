@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Tanda 1 — estilos base mínimos.
+ * El sistema de diseño completo "Grafito & Ámbar" (tokens de color,
+ * modo claro/oscuro, tipografía editorial) se define en la Tanda 2.
+ */
+
+:root {
+  color-scheme: light dark;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+}
+
+/* Números con ancho tabular para alinear montos (RD$) en columnas. */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
