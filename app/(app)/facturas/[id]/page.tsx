@@ -132,7 +132,7 @@ export default async function FacturaDetallePage({
             {cliente?.nombre ?? "Sin cliente"} · {formatearFecha(fac.fecha)}
           </p>
         </div>
-        <FacturaAcciones id={fac.id} estado={fac.estado} waHref={waHref} />
+        <FacturaAcciones id={fac.id} estado={fac.estado} saldo={saldo} waHref={waHref} />
       </div>
 
       <PdfAcciones

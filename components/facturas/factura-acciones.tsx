@@ -12,14 +12,17 @@ import { Modal } from "@/components/ui/modal";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { RegistrarCobroBoton } from "@/components/cobros/registrar-cobro-boton";
 
 export function FacturaAcciones({
   id,
   estado,
+  saldo,
   waHref,
 }: {
   id: string;
   estado: EstadoFactura;
+  saldo: number;
   waHref: string;
 }) {
   const router = useRouter();
@@ -32,6 +35,7 @@ export function FacturaAcciones({
 
   const esBorrador = estado === "borrador";
   const anulable = ["emitida", "cobrada_parcial", "vencida"].includes(estado);
+  const cobrable = anulable && saldo > 0;
 
   async function emitir() {
     setCargando("emitir");
@@ -83,6 +87,8 @@ export function FacturaAcciones({
             Emitir factura
           </Button>
         )}
+
+        {cobrable && <RegistrarCobroBoton facturaId={id} saldo={saldo} />}
 
         {estado !== "anulada" && (
           <a href={waHref} target="_blank" rel="noopener noreferrer" className="inline-block">
