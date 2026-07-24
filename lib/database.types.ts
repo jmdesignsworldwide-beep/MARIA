@@ -63,6 +63,9 @@ export interface Database {
         Update: {
           nombre_completo?: string | null;
           email?: string | null;
+          rol?: RolUsuario;
+          is_active?: boolean;
+          access_expires_at?: string | null;
         };
         Relationships: [];
       };
