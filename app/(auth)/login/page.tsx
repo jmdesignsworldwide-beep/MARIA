@@ -9,14 +9,21 @@ export const metadata: Metadata = {
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ redirect?: string }>;
+  searchParams: Promise<{ redirect?: string; motivo?: string }>;
 }) {
-  const { redirect } = await searchParams;
+  const { redirect, motivo } = await searchParams;
   // Solo se aceptan rutas internas para evitar redirecciones abiertas.
   const destino =
     redirect && redirect.startsWith("/") && !redirect.startsWith("//")
       ? redirect
       : "/dashboard";
+
+  const aviso =
+    motivo === "vencido"
+      ? "Tu acceso de demostración ha vencido. Contacta al administrador."
+      : motivo === "inactivo"
+        ? "Tu cuenta está inactiva. Contacta al administrador."
+        : null;
 
   return (
     <div className="animate-fade-in">
@@ -29,6 +36,12 @@ export default async function LoginPage({
           Entra a tu panel de facturación y control financiero.
         </p>
       </div>
+
+      {aviso && (
+        <div className="mb-4 rounded-field border border-warning/40 bg-warning-soft/50 px-4 py-3 text-center text-sm text-warning">
+          {aviso}
+        </div>
+      )}
 
       <LoginForm redirectTo={destino} />
     </div>
