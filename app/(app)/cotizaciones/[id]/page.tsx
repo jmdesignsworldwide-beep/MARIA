@@ -194,9 +194,9 @@ export default async function CotizacionDetallePage({
             <span className="text-muted">ITBIS</span>
             <span className="tabular-nums">{formatearRD(Number(cot.itbis))}</span>
           </div>
-          <div className="flex w-full max-w-xs justify-between border-t border-line pt-2 text-base font-semibold">
-            <span>Total</span>
-            <span className="tabular-nums text-accent">{formatearRD(Number(cot.total))}</span>
+          <div className="flex w-full max-w-xs items-baseline justify-between border-t border-line pt-2">
+            <span className="text-lg font-semibold text-fg">Total</span>
+            <span className="text-lg font-semibold tabular-nums text-accent">{formatearRD(Number(cot.total))}</span>
           </div>
         </div>
       </div>

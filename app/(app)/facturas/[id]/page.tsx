@@ -219,9 +219,9 @@ export default async function FacturaDetallePage({
           <Resumen label="Subtotal" valor={Number(fac.subtotal)} />
           {Number(fac.descuento) > 0 && <Resumen label="Descuento" valor={-Number(fac.descuento)} />}
           <Resumen label="ITBIS" valor={Number(fac.itbis)} />
-          <div className="flex w-full max-w-xs justify-between border-t border-line pt-2 text-base font-semibold">
-            <span>Total</span>
-            <span className="tabular-nums text-accent">{formatearRD(total)}</span>
+          <div className="flex w-full max-w-xs items-baseline justify-between border-t border-line pt-2">
+            <span className="text-lg font-semibold text-fg">Total</span>
+            <span className="text-lg font-semibold tabular-nums text-accent">{formatearRD(total)}</span>
           </div>
           {cobrado > 0 && <Resumen label="Cobrado" valor={cobrado} />}
           {saldo > 0 && fac.estado !== "anulada" && (
