@@ -6,7 +6,10 @@ import { createClient } from "@/lib/supabase/server";
 import { formatearRD, formatearFecha } from "@/lib/format";
 import { estadoFacturaMeta } from "@/lib/estados";
 import type { Factura, FacturaLinea, Pago } from "@/lib/database.types";
+import { mapEmpresaPDF, slugNombre, marcaAguaFactura } from "@/lib/pdf/helpers";
+import type { DocumentoComercialPDF } from "@/lib/pdf/tipos";
 import { Badge } from "@/components/ui/badge";
+import { PdfAcciones } from "@/components/pdf/pdf-acciones";
 import { MargenBarra } from "@/components/facturas/margen-barra";
 import { FacturaAcciones } from "@/components/facturas/factura-acciones";
 
@@ -47,10 +50,11 @@ export default async function FacturaDetallePage({
   const lineas = (fac.factura_lineas ?? []).slice().sort((a, b) => a.orden - b.orden);
   const pagos = (fac.pagos ?? []).slice().sort((a, b) => a.fecha.localeCompare(b.fecha));
 
-  const { data: empresa } = await supabase
+  const { data: empresaRow } = await supabase
     .from("empresa_config")
-    .select("nombre")
+    .select("nombre, rnc, direccion, telefono, email, cuentas_bancarias, terminos_factura")
     .maybeSingle();
+  const empresa = empresaRow;
 
   const meta = estadoFacturaMeta[fac.estado];
   const total = Number(fac.total);
@@ -63,6 +67,30 @@ export default async function FacturaDetallePage({
     saldo > 0 ? ` Saldo pendiente: ${formatearRD(saldo)}.` : " Pagada. ¡Gracias!"
   }`;
   const waHref = construirWhatsApp(cliente?.telefono ?? null, mensaje);
+
+  const empresaPDF = mapEmpresaPDF(empresaRow ?? null);
+  const docPDF: DocumentoComercialPDF = {
+    tipo: "factura",
+    numero: fac.numero,
+    fecha: fac.fecha,
+    fechaSecundaria: fac.fecha_vencimiento,
+    estado: fac.estado,
+    marcaAgua: marcaAguaFactura(fac.estado),
+    subtotal: Number(fac.subtotal),
+    descuento: Number(fac.descuento),
+    itbis: Number(fac.itbis),
+    total,
+    notas: fac.notas,
+    condiciones: null,
+    terminos: empresa?.terminos_factura ?? null,
+    lineas: lineas.map((l) => ({
+      descripcion: l.descripcion,
+      cantidad: Number(l.cantidad),
+      precio_unitario: Number(l.precio_unitario),
+      subtotal: Number(l.subtotal_linea),
+    })),
+  };
+  const nombreArchivo = `${fac.numero}_${slugNombre(cliente?.nombre)}.pdf`;
 
   // Timeline
   const eventos: { titulo: string; fecha: string; activo: boolean }[] = [
@@ -106,6 +134,25 @@ export default async function FacturaDetallePage({
         </div>
         <FacturaAcciones id={fac.id} estado={fac.estado} waHref={waHref} />
       </div>
+
+      <PdfAcciones
+        kind="comercial"
+        empresa={empresaPDF}
+        cliente={
+          cliente
+            ? {
+                nombre: cliente.nombre,
+                rnc_cedula: cliente.rnc_cedula,
+                telefono: cliente.telefono,
+                email: null,
+                direccion: null,
+              }
+            : null
+        }
+        doc={docPDF}
+        fileName={nombreArchivo}
+        previewTitle={`Factura ${fac.numero}`}
+      />
 
       {fac.estado === "anulada" && fac.motivo_anulacion && (
         <div className="flex items-start gap-2 rounded-card border border-danger/40 bg-danger-soft/50 px-4 py-3 text-sm text-danger">

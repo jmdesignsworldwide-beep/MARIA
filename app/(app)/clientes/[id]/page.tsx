@@ -15,7 +15,10 @@ import {
 import { createClient } from "@/lib/supabase/server";
 import { formatearRD, formatearFecha } from "@/lib/format";
 import { estadoFacturaMeta, estadoCotizacionMeta } from "@/lib/estados";
+import { mapEmpresaPDF, slugNombre } from "@/lib/pdf/helpers";
+import type { EstadoCuentaPDF } from "@/lib/pdf/tipos";
 import { Badge } from "@/components/ui/badge";
+import { PdfAcciones } from "@/components/pdf/pdf-acciones";
 import { ClienteFichaAcciones } from "@/components/clientes/cliente-ficha-acciones";
 
 export const metadata: Metadata = { title: "Ficha de cliente" };
@@ -72,6 +75,26 @@ export default async function ClienteFichaPage({
     { icon: MapPin, label: "Dirección", valor: cliente.direccion },
   ].filter((d) => d.valor);
 
+  // Estado de cuenta (PDF)
+  const { data: empresaRow } = await supabase
+    .from("empresa_config")
+    .select("nombre, rnc, direccion, telefono, email, cuentas_bancarias")
+    .maybeSingle();
+  const estadoCuenta: EstadoCuentaPDF = {
+    facturas: facturasValidas.map((f) => ({
+      numero: f.numero,
+      fecha: f.fecha,
+      total: Number(f.total),
+      cobrado: Number(f.total) - Number(f.saldo),
+      saldo: Number(f.saldo),
+      estado: f.estado,
+    })),
+    totalFacturado: facturado,
+    totalCobrado: cobrado,
+    totalPendiente: porCobrar,
+    generadoEl: new Date().toISOString(),
+  };
+
   return (
     <div className="space-y-6">
       <Link
@@ -108,7 +131,25 @@ export default async function ClienteFichaPage({
             </div>
           </div>
         </div>
-        <ClienteFichaAcciones cliente={cliente} />
+        <div className="flex flex-col items-start gap-2 sm:items-end">
+          <ClienteFichaAcciones cliente={cliente} />
+          {estadoCuenta.facturas.length > 0 && (
+            <PdfAcciones
+              kind="estado_cuenta"
+              empresa={mapEmpresaPDF(empresaRow ?? null)}
+              cliente={{
+                nombre: cliente.nombre,
+                rnc_cedula: cliente.rnc_cedula,
+                telefono: cliente.telefono,
+                email: cliente.email,
+                direccion: cliente.direccion,
+              }}
+              data={estadoCuenta}
+              fileName={`EstadoCuenta_${slugNombre(cliente.nombre)}.pdf`}
+              previewTitle={`Estado de cuenta · ${cliente.nombre}`}
+            />
+          )}
+        </div>
       </div>
 
       {/* KPIs de rentabilidad */}

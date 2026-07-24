@@ -18,9 +18,11 @@ const securityHeaders = [
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob: https://*.supabase.co",
       "font-src 'self' data:",
-      "connect-src 'self' https://*.supabase.co wss://*.supabase.co",
+      "connect-src 'self' blob: data: https://*.supabase.co wss://*.supabase.co",
       "media-src 'self'",
       "worker-src 'self' blob:",
+      // Vista previa de PDF (@react-pdf) se renderiza en un iframe blob:.
+      "frame-src 'self' blob:",
       "upgrade-insecure-requests",
     ].join("; "),
   },
