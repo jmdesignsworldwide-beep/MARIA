@@ -8,6 +8,7 @@ import {
   Users,
   Package,
   BarChart3,
+  TrendingUp,
   ScrollText,
   Settings,
   type LucideIcon,
@@ -103,6 +104,13 @@ export const navGroups: NavGroup[] = [
   {
     titulo: "Análisis",
     items: [
+      {
+        label: "Finanzas",
+        href: "/finanzas",
+        icon: TrendingUp,
+        tanda: 15,
+        descripcion: "Flujo de caja, resultados, proyección y rentabilidad.",
+      },
       {
         label: "Reportes",
         href: "/reportes",
