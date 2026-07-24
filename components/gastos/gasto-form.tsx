@@ -10,7 +10,7 @@ import {
   type GastoFormInput,
   type GastoInput,
 } from "@/lib/validations/gasto";
-import { crearGasto, crearCategoria } from "@/lib/actions/gastos";
+import { crearGasto, actualizarGasto, crearCategoria } from "@/lib/actions/gastos";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,14 +20,27 @@ import { Switch } from "@/components/ui/switch";
 
 type Categoria = { id: string; nombre: string };
 
+export type GastoEditable = {
+  id: string;
+  categoria_id: string | null;
+  descripcion: string;
+  monto: number;
+  fecha: string;
+  metodo_pago: GastoFormInput["metodo_pago"];
+  es_recurrente: boolean;
+  comprobante_path: string | null;
+};
+
 export function GastoForm({
   ownerId,
   categorias: categoriasIniciales,
+  gasto,
   onDone,
   onCancel,
 }: {
   ownerId: string;
   categorias: Categoria[];
+  gasto?: GastoEditable;
   onDone: () => void;
   onCancel: () => void;
 }) {
@@ -47,12 +60,12 @@ export function GastoForm({
   } = useForm<GastoFormInput, unknown, GastoInput>({
     resolver: zodResolver(gastoSchema),
     defaultValues: {
-      categoria_id: null,
-      descripcion: "",
-      monto: 0,
-      fecha: new Date().toISOString().slice(0, 10),
-      metodo_pago: "efectivo",
-      es_recurrente: false,
+      categoria_id: gasto?.categoria_id ?? null,
+      descripcion: gasto?.descripcion ?? "",
+      monto: gasto?.monto ?? 0,
+      fecha: gasto?.fecha ?? new Date().toISOString().slice(0, 10),
+      metodo_pago: gasto?.metodo_pago ?? "efectivo",
+      es_recurrente: gasto?.es_recurrente ?? false,
     },
   });
 
@@ -91,12 +104,15 @@ export function GastoForm({
       comprobantePath = path;
     }
 
-    const res = await crearGasto({ ...values, comprobante_path: comprobantePath });
+    const payload = { ...values, comprobante_path: comprobantePath };
+    const res = gasto
+      ? await actualizarGasto(gasto.id, payload)
+      : await crearGasto(payload);
     if (!res.ok) {
-      toast.error(res.error ?? "No se pudo registrar el gasto.");
+      toast.error(res.error ?? "No se pudo guardar el gasto.");
       return;
     }
-    toast.success("Gasto registrado.");
+    toast.success(gasto ? "Gasto actualizado." : "Gasto registrado.");
     onDone();
   }
 
@@ -180,6 +196,12 @@ export function GastoForm({
       {/* Comprobante */}
       <div>
         <Label className="mb-1.5 block">Comprobante (opcional)</Label>
+        {gasto?.comprobante_path && !archivo && (
+          <p className="mb-2 flex items-center gap-1.5 text-xs text-muted">
+            <Paperclip className="h-3.5 w-3.5" />
+            Ya hay un comprobante guardado. Sube uno nuevo para reemplazarlo.
+          </p>
+        )}
         <input
           ref={inputFileRef}
           type="file"
@@ -227,6 +249,8 @@ export function GastoForm({
               <Loader2 className="h-4 w-4 animate-spin" />
               Subiendo…
             </>
+          ) : gasto ? (
+            "Guardar cambios"
           ) : (
             "Registrar gasto"
           )}

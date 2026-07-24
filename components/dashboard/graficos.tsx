@@ -89,6 +89,24 @@ export function BarrasClientes({ data }: { data: { nombre: string; total: number
   );
 }
 
+export function BarrasTendenciaGastos({
+  data,
+}: {
+  data: { mes: string; total: number }[] }) {
+  return (
+    <ResponsiveContainer width="100%" height={200}>
+      <BarChart data={data} margin={{ top: 8, right: 8, left: -8, bottom: 0 }}>
+        <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+        <XAxis dataKey="mes" tick={ejeStyle} axisLine={false} tickLine={false} />
+        <YAxis tick={ejeStyle} axisLine={false} tickLine={false} width={44}
+          tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
+        <Tooltip content={<TooltipMoneda />} cursor={{ fill: "var(--bg-elevated)" }} />
+        <Bar dataKey="total" name="Gastos" fill="var(--accent)" radius={[6, 6, 0, 0]} />
+      </BarChart>
+    </ResponsiveContainer>
+  );
+}
+
 const PALETA = ["#E8A33D", "#60A5FA", "#34D399", "#F87171", "#A78BFA", "#FBBF24", "#94A3B8"];
 
 export function DonutGastos({ data }: { data: { nombre: string; total: number }[] }) {

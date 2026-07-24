@@ -8,6 +8,7 @@ export const metadata: Metadata = { title: "Gastos" };
 
 type GastoQuery = {
   id: string;
+  categoria_id: string | null;
   descripcion: string;
   monto: number;
   fecha: string;
@@ -20,6 +21,10 @@ type GastoQuery = {
 const MESES = [
   "enero", "febrero", "marzo", "abril", "mayo", "junio",
   "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre",
+];
+const MESES_CORTOS = [
+  "ene", "feb", "mar", "abr", "may", "jun",
+  "jul", "ago", "sep", "oct", "nov", "dic",
 ];
 
 function iso(d: Date): string {
@@ -34,25 +39,23 @@ export default async function GastosPage() {
   const inicioMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
   const inicioMesSig = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 1);
   const inicioMesAnt = new Date(hoy.getFullYear(), hoy.getMonth() - 1, 1);
+  // Ventana de 6 meses hacia atrás (incluye el mes actual) para filtros y tendencia.
+  const inicioVentana = new Date(hoy.getFullYear(), hoy.getMonth() - 5, 1);
 
-  const [gastosRes, anteriorRes, categoriasRes] = await Promise.all([
+  const [gastosRes, categoriasRes] = await Promise.all([
     supabase
       .from("gastos")
-      .select("id, descripcion, monto, fecha, metodo_pago, es_recurrente, comprobante_path, categoria:categorias_gasto(nombre)")
-      .gte("fecha", iso(inicioMes))
+      .select("id, categoria_id, descripcion, monto, fecha, metodo_pago, es_recurrente, comprobante_path, categoria:categorias_gasto(nombre)")
+      .gte("fecha", iso(inicioVentana))
       .lt("fecha", iso(inicioMesSig))
       .order("fecha", { ascending: false }),
-    supabase
-      .from("gastos")
-      .select("monto")
-      .gte("fecha", iso(inicioMesAnt))
-      .lt("fecha", iso(inicioMes)),
     supabase.from("categorias_gasto").select("*").order("nombre"),
   ]);
 
   const gq = (gastosRes.data as unknown as GastoQuery[] | null) ?? [];
   const gastos: GastoRow[] = gq.map((g) => ({
     id: g.id,
+    categoria_id: g.categoria_id,
     descripcion: g.descripcion,
     categoria_nombre: g.categoria?.nombre ?? null,
     monto: Number(g.monto),
@@ -62,20 +65,25 @@ export default async function GastosPage() {
     comprobante_path: g.comprobante_path,
   }));
 
-  const totalMes = gastos.reduce((a, g) => a + g.monto, 0);
-  const totalMesAnterior = ((anteriorRes.data as { monto: number }[] | null) ?? []).reduce(
-    (a, g) => a + Number(g.monto),
-    0,
-  );
+  const enRango = (g: GastoRow, desde: Date, hasta: Date) =>
+    g.fecha >= iso(desde) && g.fecha < iso(hasta);
 
-  const mapaCat = new Map<string, number>();
-  gastos.forEach((g) => {
-    const k = g.categoria_nombre ?? "Sin categoría";
-    mapaCat.set(k, (mapaCat.get(k) ?? 0) + g.monto);
-  });
-  const porCategoria = Array.from(mapaCat.entries())
-    .map(([nombre, total]) => ({ nombre, total }))
-    .sort((a, b) => b.total - a.total);
+  const gastosMes = gastos.filter((g) => enRango(g, inicioMes, inicioMesSig));
+  const totalMes = gastosMes.reduce((a, g) => a + g.monto, 0);
+  const totalMesAnterior = gastos
+    .filter((g) => enRango(g, inicioMesAnt, inicioMes))
+    .reduce((a, g) => a + g.monto, 0);
+
+  // Tendencia de 6 meses (acumulado por mes).
+  const tendencia: { mes: string; total: number }[] = [];
+  for (let k = 5; k >= 0; k--) {
+    const desde = new Date(hoy.getFullYear(), hoy.getMonth() - k, 1);
+    const hasta = new Date(hoy.getFullYear(), hoy.getMonth() - k + 1, 1);
+    const total = gastos
+      .filter((g) => enRango(g, desde, hasta))
+      .reduce((a, g) => a + g.monto, 0);
+    tendencia.push({ mes: MESES_CORTOS[desde.getMonth()] ?? "", total });
+  }
 
   return (
     <GastosVista
@@ -84,8 +92,10 @@ export default async function GastosPage() {
       gastos={gastos}
       totalMes={totalMes}
       totalMesAnterior={totalMesAnterior}
-      porCategoria={porCategoria}
+      tendencia={tendencia}
       nombreMes={MESES[hoy.getMonth()] ?? ""}
+      inicioMesIso={iso(inicioMes)}
+      finMesIso={iso(inicioMesSig)}
     />
   );
 }
