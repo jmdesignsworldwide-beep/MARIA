@@ -119,6 +119,11 @@ const s = StyleSheet.create({
     padding: 8,
   },
   bancoLinea: { fontSize: 8.5, color: c.ink, marginBottom: 1 },
+  firmaWrap: { flexDirection: "row", justifyContent: "flex-end", marginTop: 44 },
+  firmaBox: { width: 220, alignItems: "center" },
+  firmaLinea: { width: 220, borderTopWidth: 1, borderColor: c.ink, marginBottom: 4 },
+  firmaNombre: { fontSize: 9, fontFamily: "Helvetica-Bold", color: c.ink },
+  firmaRol: { fontSize: 8, color: c.muted, marginTop: 1 },
   footer: {
     position: "absolute",
     bottom: 28,
@@ -272,6 +277,15 @@ export function DocumentoComercialDoc({
             ))}
           </View>
         )}
+
+        {/* Firma */}
+        <View style={s.firmaWrap} wrap={false}>
+          <View style={s.firmaBox}>
+            <View style={s.firmaLinea} />
+            <Text style={s.firmaNombre}>{empresa.nombre}</Text>
+            <Text style={s.firmaRol}>Firma autorizada</Text>
+          </View>
+        </View>
 
         <Text style={s.footer} fixed>
           {MARCA_PIE}
