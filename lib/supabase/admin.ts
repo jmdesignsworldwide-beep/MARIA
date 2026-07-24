@@ -2,6 +2,7 @@ import "server-only";
 
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { publicEnv, getServiceRoleKey } from "@/lib/env";
+import type { Database } from "@/lib/database.types";
 
 /**
  * Cliente ADMINISTRATIVO de Supabase con `service_role`.
@@ -13,7 +14,7 @@ import { publicEnv, getServiceRoleKey } from "@/lib/env";
  * No persiste sesión: es un cliente sin estado por petición.
  */
 export function createAdminClient() {
-  return createSupabaseClient(
+  return createSupabaseClient<Database>(
     publicEnv.NEXT_PUBLIC_SUPABASE_URL,
     getServiceRoleKey(),
     {
