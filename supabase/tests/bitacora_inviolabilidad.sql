@@ -10,13 +10,14 @@
 
 begin;
 
--- Actuar como un usuario autenticado real.
-set local role authenticated;
+-- Fijar el JWT del usuario ANTES de cambiar de rol (auth.users solo es
+-- legible como postgres). Luego actuar como `authenticated`.
 select set_config(
   'request.jwt.claims',
   json_build_object('sub', (select id from auth.users order by created_at asc limit 1))::text,
   true
 );
+set local role authenticated;
 
 do $$
 declare

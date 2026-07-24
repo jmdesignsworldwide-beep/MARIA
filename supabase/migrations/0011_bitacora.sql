@@ -264,8 +264,8 @@ end $$;
 alter table public.bitacora enable row level security;
 alter table public.bitacora force row level security;
 
--- Nadie (ni admin, ni service_role) puede modificar o borrar el historial.
-revoke update, delete on public.bitacora from authenticated, anon, service_role;
+-- Nadie (ni admin, ni service_role) puede modificar, borrar ni vaciar el historial.
+revoke update, delete, truncate on public.bitacora from authenticated, anon, service_role;
 
 -- Bloqueo explícito por RLS también (defensa en profundidad).
 drop policy if exists bitacora_no_update on public.bitacora;
