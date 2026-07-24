@@ -6,7 +6,10 @@ import { createClient } from "@/lib/supabase/server";
 import { formatearRD, formatearFecha } from "@/lib/format";
 import { estadoCotizacionMeta } from "@/lib/estados";
 import type { Cotizacion, CotizacionLinea } from "@/lib/database.types";
+import { mapEmpresaPDF, slugNombre, marcaAguaCotizacion } from "@/lib/pdf/helpers";
+import type { DocumentoComercialPDF } from "@/lib/pdf/tipos";
 import { Badge } from "@/components/ui/badge";
+import { PdfAcciones } from "@/components/pdf/pdf-acciones";
 import { CotizacionAcciones } from "@/components/cotizaciones/cotizacion-acciones";
 
 export const metadata: Metadata = { title: "Cotización" };
@@ -47,10 +50,11 @@ export default async function CotizacionDetallePage({
   const cliente = cot.cliente;
   const lineas = (cot.cotizacion_lineas ?? []).slice().sort((a, b) => a.orden - b.orden);
 
-  const { data: empresa } = await supabase
+  const { data: empresaRow } = await supabase
     .from("empresa_config")
-    .select("nombre")
+    .select("nombre, rnc, direccion, telefono, email, cuentas_bancarias, terminos_cotizacion")
     .maybeSingle();
+  const empresa = empresaRow;
 
   let facturaNumero: string | null = null;
   if (cot.factura_id) {
@@ -67,6 +71,30 @@ export default async function CotizacionDetallePage({
     empresa?.nombre ? ` de ${empresa.nombre}` : ""
   } por un total de ${formatearRD(Number(cot.total))}. Válida hasta el ${formatearFecha(cot.fecha_validez)}. Quedo atento(a) a su respuesta. ¡Gracias!`;
   const waHref = construirWhatsApp(cliente?.telefono ?? null, mensaje);
+
+  const empresaPDF = mapEmpresaPDF(empresaRow ?? null);
+  const docPDF: DocumentoComercialPDF = {
+    tipo: "cotizacion",
+    numero: cot.numero,
+    fecha: cot.fecha,
+    fechaSecundaria: cot.fecha_validez,
+    estado: cot.estado,
+    marcaAgua: marcaAguaCotizacion(cot.estado),
+    subtotal: Number(cot.subtotal),
+    descuento: 0,
+    itbis: Number(cot.itbis),
+    total: Number(cot.total),
+    notas: cot.notas,
+    condiciones: cot.condiciones,
+    terminos: empresa?.terminos_cotizacion ?? null,
+    lineas: lineas.map((l) => ({
+      descripcion: l.descripcion,
+      cantidad: Number(l.cantidad),
+      precio_unitario: Number(l.precio_unitario),
+      subtotal: Number(l.subtotal_linea),
+    })),
+  };
+  const nombreArchivo = `${cot.numero}_${slugNombre(cliente?.nombre)}.pdf`;
 
   return (
     <div className="space-y-6">
@@ -92,6 +120,25 @@ export default async function CotizacionDetallePage({
         </div>
         <CotizacionAcciones id={cot.id} estado={cot.estado} waHref={waHref} />
       </div>
+
+      <PdfAcciones
+        kind="comercial"
+        empresa={empresaPDF}
+        cliente={
+          cliente
+            ? {
+                nombre: cliente.nombre,
+                rnc_cedula: cliente.rnc_cedula,
+                telefono: cliente.telefono,
+                email: null,
+                direccion: null,
+              }
+            : null
+        }
+        doc={docPDF}
+        fileName={nombreArchivo}
+        previewTitle={`Cotización ${cot.numero}`}
+      />
 
       {cot.factura_id && (
         <Link
