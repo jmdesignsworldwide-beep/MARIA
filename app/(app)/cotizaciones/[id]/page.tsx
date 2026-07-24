@@ -16,7 +16,12 @@ export const metadata: Metadata = { title: "Cotización" };
 
 type CotizacionDetalle = Cotizacion & {
   cotizacion_lineas: CotizacionLinea[];
-  cliente: { nombre: string; telefono: string | null; rnc_cedula: string | null } | null;
+  cliente: {
+    nombre: string;
+    tipo: "persona" | "empresa";
+    telefono: string | null;
+    rnc_cedula: string | null;
+  } | null;
 };
 
 function construirWhatsApp(
@@ -40,7 +45,7 @@ export default async function CotizacionDetallePage({
 
   const { data: cotData } = await supabase
     .from("cotizaciones")
-    .select("*, cotizacion_lineas(*), cliente:clientes(nombre, telefono, rnc_cedula)")
+    .select("*, cotizacion_lineas(*), cliente:clientes(nombre, tipo, telefono, rnc_cedula)")
     .eq("id", id)
     .maybeSingle();
 
@@ -128,6 +133,7 @@ export default async function CotizacionDetallePage({
           cliente
             ? {
                 nombre: cliente.nombre,
+                tipo: cliente.tipo,
                 rnc_cedula: cliente.rnc_cedula,
                 telefono: cliente.telefono,
                 email: null,
