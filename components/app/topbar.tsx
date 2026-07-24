@@ -32,40 +32,47 @@ export function Topbar({ email, nombreEmpresa }: { email: string; nombreEmpresa:
   }, [drawerAbierto]);
 
   return (
-    <header className="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-line bg-base/80 px-4 backdrop-blur lg:px-8">
-      <button
-        type="button"
-        onClick={() => setDrawerAbierto(true)}
-        aria-label="Abrir menú"
-        className="inline-flex h-10 w-10 items-center justify-center rounded-field border border-line bg-elevated text-muted transition-colors hover:text-fg lg:hidden"
-      >
-        <Menu className="h-5 w-5" />
-      </button>
+    <>
+      <header className="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-line bg-base/80 px-4 backdrop-blur lg:px-8">
+        <button
+          type="button"
+          onClick={() => setDrawerAbierto(true)}
+          aria-label="Abrir menú"
+          className="inline-flex h-10 w-10 items-center justify-center rounded-field border border-line bg-elevated text-muted transition-colors hover:text-fg lg:hidden"
+        >
+          <Menu className="h-5 w-5" />
+        </button>
 
-      <div className="lg:hidden">
-        <Brand showName={false} />
-      </div>
+        <div className="lg:hidden">
+          <Brand showName={false} />
+        </div>
 
-      {/* Buscador global (Cmd+K) */}
-      <button
-        type="button"
-        onClick={() => window.dispatchEvent(new Event("abrir-busqueda"))}
-        className="ml-auto flex items-center gap-2 rounded-field border border-line bg-elevated px-3 py-2 text-sm text-muted transition-colors hover:border-accent/50 hover:text-fg lg:ml-6 lg:w-64 lg:justify-start"
-        aria-label="Buscar"
-      >
-        <Search className="h-4 w-4 flex-none" />
-        <span className="hidden lg:inline">Buscar…</span>
-        <kbd className="ml-auto hidden rounded border border-line bg-surface px-1.5 py-0.5 text-[10px] font-medium text-muted lg:inline">
-          ⌘K
-        </kbd>
-      </button>
+        {/* Buscador global (Cmd+K) */}
+        <button
+          type="button"
+          onClick={() => window.dispatchEvent(new Event("abrir-busqueda"))}
+          className="ml-auto flex items-center gap-2 rounded-field border border-line bg-elevated px-3 py-2 text-sm text-muted transition-colors hover:border-accent/50 hover:text-fg lg:ml-6 lg:w-64 lg:justify-start"
+          aria-label="Buscar"
+        >
+          <Search className="h-4 w-4 flex-none" />
+          <span className="hidden lg:inline">Buscar…</span>
+          <kbd className="ml-auto hidden rounded border border-line bg-surface px-1.5 py-0.5 text-[10px] font-medium text-muted lg:inline">
+            ⌘K
+          </kbd>
+        </button>
 
-      <div className="flex items-center gap-2 lg:ml-2">
-        <ThemeToggle />
-        <UserMenu email={email} nombre={nombreEmpresa} />
-      </div>
+        <div className="flex items-center gap-2 lg:ml-2">
+          <ThemeToggle />
+          <UserMenu email={email} nombre={nombreEmpresa} />
+        </div>
+      </header>
 
-      {/* Cajón de navegación móvil */}
+      {/*
+        Cajón de navegación móvil. Va FUERA del <header>: como el header usa
+        backdrop-blur, se convierte en bloque contenedor de los elementos
+        position:fixed y recortaba el cajón a la altura de la barra (bug del
+        menú que "no cargaba nada"). Aquí se posiciona contra el viewport.
+      */}
       <AnimatePresence>
         {drawerAbierto && (
           <>
@@ -108,6 +115,6 @@ export function Topbar({ email, nombreEmpresa }: { email: string; nombreEmpresa:
           </>
         )}
       </AnimatePresence>
-    </header>
+    </>
   );
 }
