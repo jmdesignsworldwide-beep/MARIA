@@ -458,9 +458,11 @@ export interface Database {
           accion: string;
           entidad: string;
           entidad_id?: string | null;
+          descripcion?: string | null;
           datos_antes?: Json | null;
           datos_despues?: Json | null;
           ip?: string | null;
+          user_agent?: string | null;
           id?: string;
           created_at?: string;
         };

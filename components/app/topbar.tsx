@@ -14,7 +14,15 @@ import { UserMenu } from "@/components/app/user-menu";
  * Barra superior. En móvil incluye el botón hamburguesa que abre el
  * cajón de navegación; en escritorio solo acompaña con acciones.
  */
-export function Topbar({ email, nombreEmpresa }: { email: string; nombreEmpresa: string }) {
+export function Topbar({
+  email,
+  nombreEmpresa,
+  esAdmin = false,
+}: {
+  email: string;
+  nombreEmpresa: string;
+  esAdmin?: boolean;
+}) {
   const [drawerAbierto, setDrawerAbierto] = useState(false);
   const pathname = usePathname();
 
@@ -109,7 +117,7 @@ export function Topbar({ email, nombreEmpresa }: { email: string; nombreEmpresa:
                 </button>
               </div>
               <div className="scrollbar-thin flex-1 overflow-y-auto">
-                <NavContent onNavigate={() => setDrawerAbierto(false)} />
+                <NavContent esAdmin={esAdmin} onNavigate={() => setDrawerAbierto(false)} />
               </div>
             </motion.div>
           </>

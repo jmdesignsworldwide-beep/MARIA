@@ -6,19 +6,17 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { motion } from "framer-motion";
-import { Eye, EyeOff, Mail, Lock, ArrowRight } from "lucide-react";
+import { Eye, EyeOff, User, Lock, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 import { registrarSesion } from "@/lib/actions/bitacora";
+import { usuarioAEmail } from "@/lib/accesos/identidad";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 const loginSchema = z.object({
-  email: z
-    .string()
-    .min(1, "Escribe tu correo")
-    .email("Correo no válido"),
+  usuario: z.string().trim().min(1, "Escribe tu usuario"),
   password: z.string().min(1, "Escribe tu contraseña"),
 });
 
@@ -28,9 +26,7 @@ type LoginValues = z.infer<typeof loginSchema>;
 function traducirError(mensaje: string): string {
   const m = mensaje.toLowerCase();
   if (m.includes("invalid login credentials"))
-    return "Correo o contraseña incorrectos.";
-  if (m.includes("email not confirmed"))
-    return "Tu correo aún no ha sido confirmado.";
+    return "Usuario o contraseña incorrectos.";
   if (m.includes("too many requests") || m.includes("rate limit"))
     return "Demasiados intentos. Espera un momento e inténtalo de nuevo.";
   if (m.includes("failed to fetch") || m.includes("network"))
@@ -48,24 +44,29 @@ export function LoginForm({ redirectTo }: { redirectTo: string }) {
     formState: { errors, isSubmitting },
   } = useForm<LoginValues>({
     resolver: zodResolver(loginSchema),
-    defaultValues: { email: "", password: "" },
+    defaultValues: { usuario: "", password: "" },
   });
 
   async function onSubmit(values: LoginValues) {
     const supabase = createClient();
+    // El cliente entra con usuario; se mapea a su email fantasma. Si escribe
+    // un correo completo (recuperación de admin) se usa tal cual.
+    const entrada = values.usuario.trim();
+    const email = entrada.includes("@") ? entrada.toLowerCase() : usuarioAEmail(entrada);
+
     const { error } = await supabase.auth.signInWithPassword({
-      email: values.email.trim(),
+      email,
       password: values.password,
     });
 
     if (error) {
-      void registrarSesion("sesion_fallida", values.email.trim());
+      void registrarSesion("sesion_fallida", email);
       toast.error(traducirError(error.message));
       return;
     }
 
     void registrarSesion("sesion_inicio");
-    toast.success("Sesión iniciada. Bienvenida.");
+    toast.success("Sesión iniciada. Bienvenido.");
     router.push(redirectTo);
     router.refresh();
   }
@@ -80,25 +81,25 @@ export function LoginForm({ redirectTo }: { redirectTo: string }) {
       noValidate
     >
       <div className="space-y-2">
-        <Label htmlFor="email">Correo electrónico</Label>
+        <Label htmlFor="usuario">Usuario</Label>
         <div className="relative">
-          <Mail
+          <User
             className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted"
             aria-hidden
           />
           <Input
-            id="email"
-            type="email"
-            inputMode="email"
-            autoComplete="email"
-            placeholder="tu@empresa.com"
+            id="usuario"
+            type="text"
+            autoCapitalize="none"
+            autoComplete="username"
+            placeholder="tu usuario"
             className="pl-10"
-            aria-invalid={!!errors.email}
-            {...register("email")}
+            aria-invalid={!!errors.usuario}
+            {...register("usuario")}
           />
         </div>
-        {errors.email && (
-          <p className="text-xs text-danger">{errors.email.message}</p>
+        {errors.usuario && (
+          <p className="text-xs text-danger">{errors.usuario.message}</p>
         )}
       </div>
 

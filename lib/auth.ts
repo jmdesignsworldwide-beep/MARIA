@@ -55,3 +55,22 @@ export async function getRol(): Promise<string | null> {
   const { data } = await supabase.from("profiles").select("rol").eq("id", user.id).maybeSingle();
   return data?.rol ?? null;
 }
+
+/**
+ * Exige que el usuario sea ADMIN (validación en el servidor). Un cliente
+ * que fuerce la URL del portal de accesos es redirigido al panel — nunca
+ * ve ni alcanza la gestión de cuentas.
+ */
+export async function requireAdmin() {
+  const user = await requireUser();
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("profiles")
+    .select("rol")
+    .eq("id", user.id)
+    .maybeSingle();
+  if (data?.rol !== "admin") {
+    redirect("/dashboard");
+  }
+  return user;
+}

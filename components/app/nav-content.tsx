@@ -3,19 +3,27 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
-import { navGroups } from "@/lib/navigation";
+import { navGroupsParaRol } from "@/lib/navigation";
 import { cn } from "@/lib/utils";
 
 /**
  * Contenido de navegación compartido entre la barra lateral (escritorio)
  * y el cajón móvil. Resalta el ítem activo con un indicador ámbar animado.
+ * Los ítems de administración solo aparecen si `esAdmin` es verdadero (el
+ * control real está en el servidor).
  */
-export function NavContent({ onNavigate }: { onNavigate?: () => void }) {
+export function NavContent({
+  onNavigate,
+  esAdmin = false,
+}: {
+  onNavigate?: () => void;
+  esAdmin?: boolean;
+}) {
   const pathname = usePathname();
 
   return (
     <nav className="flex flex-col gap-6 px-3 py-4">
-      {navGroups.map((grupo) => (
+      {navGroupsParaRol(esAdmin).map((grupo) => (
         <div key={grupo.titulo} className="flex flex-col gap-1">
           <p className="px-3 pb-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted">
             {grupo.titulo}

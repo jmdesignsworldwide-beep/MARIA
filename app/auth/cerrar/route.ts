@@ -11,7 +11,13 @@ export async function GET(request: NextRequest) {
 
   const motivo = request.nextUrl.searchParams.get("motivo") ?? "";
   const url = request.nextUrl.clone();
-  url.pathname = "/login";
-  url.search = motivo ? `?motivo=${motivo}` : "";
+  // Cuenta vencida → pantalla elegante de acceso expirado. Inactiva u otro → login.
+  if (motivo === "vencido") {
+    url.pathname = "/acceso-expirado";
+    url.search = "";
+  } else {
+    url.pathname = "/login";
+    url.search = motivo ? `?motivo=${motivo}` : "";
+  }
   return NextResponse.redirect(url);
 }
