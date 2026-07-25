@@ -14,10 +14,10 @@
   :root,
   .dark {
     --bg-base: #0a0c0f;
-    --bg-surface: #13161b;
-    --bg-elevated: #1b1f26;
-    --border: #262b33;
-    --border-soft: #1e222a;
+    --bg-surface: #14171d;
+    --bg-elevated: #1d222b;
+    --border: #2a3039;
+    --border-soft: #20252d;
     --text-primary: #f2f4f7;
     --text-muted: #98a2b3;
     --accent: #e8a33d;
@@ -79,13 +79,29 @@
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    line-height: 1.55;
+  }
+
+  /* Jerarquía tipográfica: títulos display bien ajustados. */
+  h1, h2, h3 {
+    letter-spacing: -0.02em;
+    line-height: 1.15;
   }
 
   /* Foco visible y accesible (AA) en todo elemento interactivo. */
   :focus-visible {
     outline: 2px solid var(--ring);
     outline-offset: 2px;
-    border-radius: 4px;
+    border-radius: 6px;
+  }
+
+  /* Anillo de foco elegante en campos de formulario (ámbar suave). */
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent);
   }
 
   /* Autocompletar sin fondo blanco chillón en modo oscuro. */
@@ -125,6 +141,37 @@
     background-color: var(--border);
     border-radius: 9999px;
   }
+
+  /* Transición sutil de entrada al navegar entre módulos. */
+  .page-enter {
+    animation: page-enter 0.26s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  /* Fondo "aurora" premium para el login (grafito + ámbar), lento y sutil. */
+  .aurora {
+    position: absolute;
+    inset: -20%;
+    z-index: -10;
+    background:
+      radial-gradient(38% 44% at 22% 26%, color-mix(in srgb, var(--accent) 34%, transparent) 0%, transparent 60%),
+      radial-gradient(34% 40% at 80% 22%, color-mix(in srgb, var(--info) 22%, transparent) 0%, transparent 60%),
+      radial-gradient(46% 50% at 62% 82%, color-mix(in srgb, var(--accent) 20%, transparent) 0%, transparent 62%);
+    filter: blur(46px) saturate(1.05);
+    opacity: 0.75;
+    animation: aurora-drift 22s ease-in-out infinite alternate;
+    will-change: transform;
+  }
+}
+
+@keyframes page-enter {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes aurora-drift {
+  0% { transform: translate3d(-3%, -2%, 0) scale(1.05) rotate(0deg); }
+  50% { transform: translate3d(3%, 2%, 0) scale(1.12) rotate(4deg); }
+  100% { transform: translate3d(-2%, 3%, 0) scale(1.06) rotate(-3deg); }
 }
 
 /* Respeta a quien prefiere menos movimiento. */
