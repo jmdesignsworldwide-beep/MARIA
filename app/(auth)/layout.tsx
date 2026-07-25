@@ -8,6 +8,8 @@ import { ThemeToggle } from "@/components/ui/theme-toggle";
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-5 py-10">
+      {/* Aurora premium animada (grafito + ámbar), lenta y sutil. */}
+      <div aria-hidden className="pointer-events-none aurora" />
       {/* Halo ámbar decorativo, muy sutil. */}
       <div
         aria-hidden
@@ -15,7 +17,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
         style={{
           background:
             "radial-gradient(60% 50% at 50% -10%, var(--accent-soft) 0%, transparent 60%)",
-          opacity: 0.7,
+          opacity: 0.5,
         }}
       />
       <div

@@ -5,12 +5,12 @@ import { cva, type VariantProps } from "class-variance-authority";
  * puedan usarse en Componentes de Servidor (p. ej. estilar un <Link>).
  */
 export const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-field text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-base disabled:pointer-events-none disabled:opacity-50 select-none",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-field text-sm font-medium transition-all duration-150 ease-out active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-base disabled:pointer-events-none disabled:opacity-50 select-none",
   {
     variants: {
       variant: {
         primary:
-          "bg-accent text-accent-contrast hover:bg-accent-hover shadow-soft",
+          "bg-accent text-accent-contrast hover:bg-accent-hover shadow-soft hover:shadow-card",
         secondary:
           "bg-elevated text-fg border border-line hover:border-accent/60",
         outline:
