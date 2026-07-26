@@ -19,7 +19,7 @@ export function Sidebar({ esAdmin = false }: { esAdmin?: boolean }) {
       </div>
       <div className="flex-none border-t border-line px-5 py-3">
         <p className="text-[10px] text-muted">
-          Versión demo · Grafito &amp; Ámbar
+          Versión demo · Grafito &amp; Ámbar · v19
         </p>
       </div>
     </aside>
