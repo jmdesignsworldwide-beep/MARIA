@@ -46,34 +46,46 @@ export function Modal({
   return (
     <AnimatePresence>
       {open && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center p-0 sm:items-center sm:p-4">
+        <>
+          {/* Fondo (backdrop) fijo — cubre toda la pantalla. */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="absolute inset-0"
+            className="fixed inset-0 z-50"
             style={{ background: "var(--overlay)", backdropFilter: "blur(3px)" }}
             aria-hidden
           />
+          {/* RED DE SEGURIDAD: esta capa hace scroll. Si por lo que sea el modal
+              llegara a ser más alto que la pantalla, se scrollea la capa entera
+              y el encabezado NUNCA queda inalcanzable. */}
+          <div
+            onClick={onClose}
+            style={{ position: "fixed", inset: 0, zIndex: 50, overflowY: "auto" }}
+            className="flex min-h-full items-center justify-center p-0 sm:p-4"
+          >
           <motion.div
             role="dialog"
             aria-modal="true"
             aria-label={title}
+            onClick={(e) => e.stopPropagation()}
             initial={{ opacity: 0, y: 20, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.96 }}
             transition={{ type: "spring", stiffness: 320, damping: 30 }}
-            /* Estructura EN LÍNEA: no depende de la hoja de estilos (inmune a
-               CSS viejo en caché). Así el modal SIEMPRE queda contenido. */
+            /* Estructura EN LÍNEA (no depende de la hoja de estilos) + tope en
+               vh puro (soportado por todos los navegadores). */
             style={{
               display: "flex",
               flexDirection: "column",
               overflow: "hidden",
-              maxHeight: "min(90svh, 90vh)",
+              maxHeight: "90vh",
+              marginTop: "auto",
+              marginBottom: "auto",
             }}
             className={cn(
-              "relative z-10 w-full rounded-t-modal border border-line bg-surface shadow-elevated sm:rounded-modal",
+              "relative z-10 w-full max-h-[90vh] self-center rounded-t-modal border border-line bg-surface shadow-elevated sm:rounded-modal",
               size === "lg" ? "sm:max-w-2xl" : "sm:max-w-lg",
             )}
           >
@@ -119,7 +131,8 @@ export function Modal({
               </div>
             )}
           </motion.div>
-        </div>
+          </div>
+        </>
       )}
     </AnimatePresence>
   );
