@@ -64,6 +64,7 @@ export function Modal({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.96 }}
             transition={{ type: "spring", stiffness: 320, damping: 30 }}
+            style={{ maxHeight: "min(90svh, 90vh)" }}
             className={cn(
               "relative z-10 flex max-h-[90vh] w-full flex-col overflow-hidden rounded-t-modal border border-line bg-surface shadow-elevated sm:rounded-modal",
               size === "lg" ? "sm:max-w-2xl" : "sm:max-w-lg",
