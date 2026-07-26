@@ -64,14 +64,24 @@ export function Modal({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.96 }}
             transition={{ type: "spring", stiffness: 320, damping: 30 }}
-            style={{ maxHeight: "min(90svh, 90vh)" }}
+            /* Estructura EN LÍNEA: no depende de la hoja de estilos (inmune a
+               CSS viejo en caché). Así el modal SIEMPRE queda contenido. */
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              overflow: "hidden",
+              maxHeight: "min(90svh, 90vh)",
+            }}
             className={cn(
-              "relative z-10 flex max-h-[90vh] w-full flex-col overflow-hidden rounded-t-modal border border-line bg-surface shadow-elevated sm:rounded-modal",
+              "relative z-10 w-full rounded-t-modal border border-line bg-surface shadow-elevated sm:rounded-modal",
               size === "lg" ? "sm:max-w-2xl" : "sm:max-w-lg",
             )}
           >
-            {/* ZONA 1 — Encabezado fijo */}
-            <div className="flex shrink-0 items-start justify-between gap-4 border-b border-line px-6 pb-4 pt-6">
+            {/* ZONA 1 — Encabezado fijo (no se encoge) */}
+            <div
+              style={{ flexShrink: 0 }}
+              className="flex items-start justify-between gap-4 border-b border-line px-6 pb-4 pt-6"
+            >
               <div className="space-y-1">
                 <h2 className="font-display text-xl font-semibold tracking-tight">
                   {title}
@@ -90,14 +100,21 @@ export function Modal({
               </button>
             </div>
 
-            {/* ZONA 2 — Cuerpo con scroll (lo único que scrollea) */}
-            <div className="scrollbar-thin min-h-0 flex-1 overflow-y-auto px-6 py-5">
+            {/* ZONA 2 — Cuerpo con scroll (lo único que scrollea).
+                minHeight:0 en línea es la clave para que scrollee dentro del flex. */}
+            <div
+              style={{ flex: "1 1 0%", minHeight: 0, overflowY: "auto" }}
+              className="scrollbar-thin px-6 py-5"
+            >
               {children}
             </div>
 
             {/* ZONA 3 — Pie fijo (siempre visible) */}
             {footer && (
-              <div className="flex shrink-0 items-center justify-end gap-3 border-t border-line px-6 py-4">
+              <div
+                style={{ flexShrink: 0 }}
+                className="flex items-center justify-end gap-3 border-t border-line px-6 py-4"
+              >
                 {footer}
               </div>
             )}
