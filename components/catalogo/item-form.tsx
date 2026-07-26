@@ -159,7 +159,7 @@ export function ItemForm({
         )}
       />
 
-      <div className="flex justify-end gap-3 pt-2">
+      <div className="sticky bottom-0 -mx-6 -mb-5 flex justify-end gap-3 border-t border-line bg-surface px-6 py-4">
         <Button type="button" variant="ghost" onClick={onCancel} disabled={isSubmitting}>
           Cancelar
         </Button>

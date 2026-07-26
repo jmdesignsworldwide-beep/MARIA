@@ -5,13 +5,19 @@ import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-/** Modal accesible con animación spring (radio 16px, Regla de diseño). */
+/**
+ * Modal accesible en TRES zonas: encabezado fijo, cuerpo con scroll y pie
+ * fijo. La clave para que nunca se desborde es `max-h` en el contenedor +
+ * `flex-1 min-h-0 overflow-y-auto` en el cuerpo (sin `min-h-0` el scroll no
+ * funciona dentro de un flex y el modal crece hasta salirse de la pantalla).
+ */
 export function Modal({
   open,
   onClose,
   title,
   description,
   children,
+  footer,
   size = "md",
 }: {
   open: boolean;
@@ -19,6 +25,8 @@ export function Modal({
   title: string;
   description?: string;
   children: ReactNode;
+  /** Pie fijo (botones). Si se omite, el contenido incluye sus propios botones. */
+  footer?: ReactNode;
   size?: "md" | "lg";
 }) {
   useEffect(() => {
@@ -38,37 +46,37 @@ export function Modal({
   return (
     <AnimatePresence>
       {open && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center">
+        <div className="fixed inset-0 z-50 flex items-end justify-center p-0 sm:items-center sm:p-4">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
             className="absolute inset-0"
-            style={{ background: "var(--overlay)", backdropFilter: "blur(2px)" }}
+            style={{ background: "var(--overlay)", backdropFilter: "blur(3px)" }}
             aria-hidden
           />
           <motion.div
             role="dialog"
             aria-modal="true"
             aria-label={title}
-            initial={{ opacity: 0, y: 24, scale: 0.98 }}
+            initial={{ opacity: 0, y: 20, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 24, scale: 0.98 }}
-            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            exit={{ opacity: 0, y: 20, scale: 0.96 }}
+            transition={{ type: "spring", stiffness: 320, damping: 30 }}
             className={cn(
-              "relative z-10 flex max-h-[92vh] w-full flex-col overflow-hidden rounded-modal border border-line bg-surface shadow-elevated",
-              "sm:max-h-[88vh]",
+              "relative z-10 flex max-h-[90vh] w-full flex-col overflow-hidden rounded-t-modal border border-line bg-surface shadow-elevated sm:rounded-modal",
               size === "lg" ? "sm:max-w-2xl" : "sm:max-w-lg",
             )}
           >
-            <div className="flex items-start justify-between gap-4 border-b border-line px-6 py-4">
-              <div className="space-y-0.5">
-                <h2 className="font-display text-lg font-semibold tracking-tight">
+            {/* ZONA 1 — Encabezado fijo */}
+            <div className="flex shrink-0 items-start justify-between gap-4 border-b border-line px-6 pb-4 pt-6">
+              <div className="space-y-1">
+                <h2 className="font-display text-xl font-semibold tracking-tight">
                   {title}
                 </h2>
                 {description && (
-                  <p className="text-sm text-muted">{description}</p>
+                  <p className="text-sm leading-relaxed text-muted">{description}</p>
                 )}
               </div>
               <button
@@ -80,9 +88,18 @@ export function Modal({
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <div className="scrollbar-thin overflow-y-auto px-6 py-5">
+
+            {/* ZONA 2 — Cuerpo con scroll (lo único que scrollea) */}
+            <div className="scrollbar-thin min-h-0 flex-1 overflow-y-auto px-6 py-5">
               {children}
             </div>
+
+            {/* ZONA 3 — Pie fijo (siempre visible) */}
+            {footer && (
+              <div className="flex shrink-0 items-center justify-end gap-3 border-t border-line px-6 py-4">
+                {footer}
+              </div>
+            )}
           </motion.div>
         </div>
       )}
