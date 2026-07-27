@@ -6,12 +6,11 @@ import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /**
- * Modal con el patrón MÁS robusto que existe: la capa exterior hace scroll
- * y el modal simplemente fluye dentro. No hay `max-height`, ni `overflow:
- * hidden`, ni trucos de flex — por eso es IMPOSIBLE que corte el contenido:
- * si el modal es más alto que la pantalla, la capa se desplaza y todo (el
- * encabezado incluido) siempre es alcanzable. Alineado arriba para que el
- * título quede visible al abrir.
+ * Modal en TRES zonas: encabezado fijo, cuerpo con scroll interno y pie fijo.
+ * El cuerpo es el que scrollea (por eso el pie pegajoso de los formularios se
+ * queda abajo, no flotando en el medio). Tope de altura en `vh` puro + una
+ * capa exterior con scroll de respaldo, para que el encabezado nunca quede
+ * inalcanzable pase lo que pase.
  */
 export function Modal({
   open,
@@ -63,11 +62,11 @@ export function Modal({
             }}
             aria-hidden
           />
-          {/* Capa que hace SCROLL. El modal fluye dentro; nunca se corta. */}
+          {/* Capa exterior con scroll de respaldo + centrado. */}
           <div
             onClick={onClose}
             style={{ position: "fixed", inset: 0, zIndex: 50, overflowY: "auto" }}
-            className="flex min-h-full items-start justify-center p-4 sm:py-10"
+            className="flex min-h-full items-center justify-center p-4"
           >
             <motion.div
               role="dialog"
@@ -78,14 +77,24 @@ export function Modal({
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 16, scale: 0.97 }}
               transition={{ type: "spring", stiffness: 320, damping: 30 }}
-              style={{ marginTop: "auto", marginBottom: "auto" }}
+              /* Tres zonas EN LÍNEA (no dependen de la hoja de estilos):
+                 flex columna + tope 90vh + overflow hidden. */
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                overflow: "hidden",
+                maxHeight: "90vh",
+              }}
               className={cn(
-                "relative z-10 w-full rounded-modal border border-line bg-surface shadow-elevated",
+                "relative z-10 my-auto w-full max-h-[90vh] rounded-modal border border-line bg-surface shadow-elevated",
                 size === "lg" ? "sm:max-w-2xl" : "sm:max-w-lg",
               )}
             >
-              {/* Encabezado */}
-              <div className="flex items-start justify-between gap-4 border-b border-line px-6 pb-4 pt-6">
+              {/* ZONA 1 — Encabezado fijo */}
+              <div
+                style={{ flexShrink: 0 }}
+                className="flex items-start justify-between gap-4 border-b border-line px-6 pb-4 pt-6"
+              >
                 <div className="space-y-1">
                   <h2 className="font-display text-xl font-semibold tracking-tight">
                     {title}
@@ -104,12 +113,20 @@ export function Modal({
                 </button>
               </div>
 
-              {/* Cuerpo — fluye con su contenido (sin tope ni scroll interno). */}
-              <div className="px-6 py-5">{children}</div>
+              {/* ZONA 2 — Cuerpo con scroll INTERNO (lo único que scrollea). */}
+              <div
+                style={{ flex: "1 1 0%", minHeight: 0, overflowY: "auto" }}
+                className="scrollbar-thin px-6 py-5"
+              >
+                {children}
+              </div>
 
-              {/* Pie opcional (los formularios traen su propio pie pegajoso). */}
+              {/* ZONA 3 — Pie fijo opcional */}
               {footer && (
-                <div className="flex items-center justify-end gap-3 border-t border-line px-6 py-4">
+                <div
+                  style={{ flexShrink: 0 }}
+                  className="flex items-center justify-end gap-3 border-t border-line px-6 py-4"
+                >
                   {footer}
                 </div>
               )}
