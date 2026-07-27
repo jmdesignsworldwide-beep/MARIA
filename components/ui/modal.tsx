@@ -1,16 +1,21 @@
 "use client";
 
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /**
- * Modal robusto: EL PROPIO MODAL es el contenedor con scroll (no un hijo flex).
- * El encabezado es `sticky top-0`, así que es lo PRIMERO del scroll y no se puede
- * cortar jamás. Los pies pegajosos de los formularios (`sticky bottom-0`) se pegan
- * al fondo del scroll del modal. Sin cálculos de altura flex que puedan colapsar.
- * Tope de altura en `vh` puro (universal) + capa exterior con scroll de respaldo.
+ * Modal robusto y a prueba de "ancestros con transform".
+ *
+ * CLAVE: se renderiza con un PORTAL a `document.body`. Así el `position: fixed`
+ * siempre se mide contra la ventana, nunca contra un ancestro con `transform`
+ * (como el envoltorio `.page-enter` de las páginas), que era lo que atrapaba al
+ * modal en una caja corta y lo cortaba pasara lo que pasara por dentro.
+ *
+ * Encima, el propio modal es el contenedor con scroll y el encabezado es
+ * `sticky top-0`, así que el título nunca se corta.
  */
 export function Modal({
   open,
@@ -29,6 +34,9 @@ export function Modal({
   footer?: ReactNode;
   size?: "md" | "lg";
 }) {
+  const [montado, setMontado] = useState(false);
+  useEffect(() => setMontado(true), []);
+
   useEffect(() => {
     function onEsc(e: KeyboardEvent) {
       if (e.key === "Escape") onClose();
@@ -43,7 +51,9 @@ export function Modal({
     };
   }, [open, onClose]);
 
-  return (
+  if (!montado) return null;
+
+  const contenido = (
     <AnimatePresence>
       {open && (
         <>
@@ -56,7 +66,7 @@ export function Modal({
             style={{
               position: "fixed",
               inset: 0,
-              zIndex: 50,
+              zIndex: 100,
               background: "var(--overlay)",
               backdropFilter: "blur(3px)",
             }}
@@ -65,7 +75,7 @@ export function Modal({
           {/* Capa exterior: centra el modal y hace de scroll de respaldo. */}
           <div
             onClick={onClose}
-            style={{ position: "fixed", inset: 0, zIndex: 50, overflowY: "auto" }}
+            style={{ position: "fixed", inset: 0, zIndex: 100, overflowY: "auto" }}
             className="flex min-h-full items-center justify-center p-4"
           >
             {/* EL MODAL ES EL SCROLL. Encabezado sticky = nunca se corta. */}
@@ -119,4 +129,6 @@ export function Modal({
       )}
     </AnimatePresence>
   );
+
+  return createPortal(contenido, document.body);
 }
