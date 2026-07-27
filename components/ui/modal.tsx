@@ -6,11 +6,11 @@ import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /**
- * Modal en TRES zonas: encabezado fijo, cuerpo con scroll interno y pie fijo.
- * El cuerpo es el que scrollea (por eso el pie pegajoso de los formularios se
- * queda abajo, no flotando en el medio). Tope de altura en `vh` puro + una
- * capa exterior con scroll de respaldo, para que el encabezado nunca quede
- * inalcanzable pase lo que pase.
+ * Modal robusto: EL PROPIO MODAL es el contenedor con scroll (no un hijo flex).
+ * El encabezado es `sticky top-0`, así que es lo PRIMERO del scroll y no se puede
+ * cortar jamás. Los pies pegajosos de los formularios (`sticky bottom-0`) se pegan
+ * al fondo del scroll del modal. Sin cálculos de altura flex que puedan colapsar.
+ * Tope de altura en `vh` puro (universal) + capa exterior con scroll de respaldo.
  */
 export function Modal({
   open,
@@ -62,12 +62,13 @@ export function Modal({
             }}
             aria-hidden
           />
-          {/* Capa exterior con scroll de respaldo + centrado. */}
+          {/* Capa exterior: centra el modal y hace de scroll de respaldo. */}
           <div
             onClick={onClose}
             style={{ position: "fixed", inset: 0, zIndex: 50, overflowY: "auto" }}
             className="flex min-h-full items-center justify-center p-4"
           >
+            {/* EL MODAL ES EL SCROLL. Encabezado sticky = nunca se corta. */}
             <motion.div
               role="dialog"
               aria-modal="true"
@@ -77,24 +78,14 @@ export function Modal({
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 16, scale: 0.97 }}
               transition={{ type: "spring", stiffness: 320, damping: 30 }}
-              /* Tres zonas EN LÍNEA (no dependen de la hoja de estilos):
-                 flex columna + tope 90vh + overflow hidden. */
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                overflow: "hidden",
-                maxHeight: "90vh",
-              }}
+              style={{ maxHeight: "92vh", overflowY: "auto" }}
               className={cn(
-                "relative z-10 my-auto w-full max-h-[90vh] rounded-modal border border-line bg-surface shadow-elevated",
+                "scrollbar-thin relative z-10 my-auto w-full max-h-[92vh] rounded-modal border border-line bg-surface shadow-elevated",
                 size === "lg" ? "sm:max-w-2xl" : "sm:max-w-lg",
               )}
             >
-              {/* ZONA 1 — Encabezado fijo */}
-              <div
-                style={{ flexShrink: 0 }}
-                className="flex items-start justify-between gap-4 border-b border-line px-6 pb-4 pt-6"
-              >
+              {/* Encabezado PEGAJOSO arriba (primer hijo del scroll). */}
+              <div className="sticky top-0 z-20 flex items-start justify-between gap-4 border-b border-line bg-surface px-6 pb-4 pt-6">
                 <div className="space-y-1">
                   <h2 className="font-display text-xl font-semibold tracking-tight">
                     {title}
@@ -113,20 +104,12 @@ export function Modal({
                 </button>
               </div>
 
-              {/* ZONA 2 — Cuerpo con scroll INTERNO (lo único que scrollea). */}
-              <div
-                style={{ flex: "1 1 0%", minHeight: 0, overflowY: "auto" }}
-                className="scrollbar-thin px-6 py-5"
-              >
-                {children}
-              </div>
+              {/* Cuerpo en flujo normal: el scroll lo pone el modal. */}
+              <div className="px-6 py-5">{children}</div>
 
-              {/* ZONA 3 — Pie fijo opcional */}
+              {/* Pie opcional (por prop): pegajoso al fondo del scroll. */}
               {footer && (
-                <div
-                  style={{ flexShrink: 0 }}
-                  className="flex items-center justify-end gap-3 border-t border-line px-6 py-4"
-                >
+                <div className="sticky bottom-0 z-20 flex items-center justify-end gap-3 border-t border-line bg-surface px-6 py-4">
                   {footer}
                 </div>
               )}
